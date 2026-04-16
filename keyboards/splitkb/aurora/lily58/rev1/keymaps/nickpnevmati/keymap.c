@@ -19,24 +19,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [5] = LAYOUT(KC_NO, KC_F13, KC_F14, KC_F15, KC_F16, KC_F17, LGUI(KC_SPC), KC_MPRV, KC_MPLY, KC_MNXT, KC_NO, KC_NO, LALT(KC_TAB), KC_GRV, LCTL(KC_W), LGUI(KC_E), LCTL(KC_R), LCTL(KC_T), KC_HOME, KC_PGUP, KC_UP, KC_PGDN, KC_INS, KC_NO, KC_TRNS, LCTL(KC_A), MS_BTN3, MS_BTN2, MS_BTN1, KC_F12, KC_END, KC_LEFT, KC_DOWN, KC_RGHT, KC_DEL, KC_NO, KC_LCTL, KC_LGUI, LCTL(KC_X), LCTL(KC_C), LCTL(KC_V), KC_PSCR, KC_NO, KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_CAPS, KC_TRNS, KC_TRNS, KC_TRNS, KC_NO, KC_BSPC, MO(3), KC_NO, KC_NO)
 };
 
-
-
-
-#ifdef ENCODER_ENABLE
-bool encoder_update_user(uint8_t index, bool clockwise) {
-    if (index == 0) {
-        // Left encoder: page up/down
-        tap_code(clockwise ? KC_PGDN : KC_PGUP);
-    } else if (index == 1) {
-        // Right encoder: volume
-        tap_code(clockwise ? KC_VOLU : KC_VOLD);
-    }
-    return false;
-}
+#if defined(ENCODER_MAP_ENABLE)
+const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
+    [0] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [1] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [2] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [3] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [4] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [5] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+};
 #endif
-
-#ifdef OTHER_KEYMAP_C
-#    include OTHER_KEYMAP_C
-#endif // OTHER_KEYMAP_C
 
 
