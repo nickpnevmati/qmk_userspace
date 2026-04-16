@@ -1,1 +1,0 @@
-keyboards/splitkb/aurora/lily58/rev1/keymaps/nickpnevmati/keymap.c
