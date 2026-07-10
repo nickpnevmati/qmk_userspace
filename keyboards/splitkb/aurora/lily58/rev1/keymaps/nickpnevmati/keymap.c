@@ -3,22 +3,76 @@
 #    include "keymap.h"
 #endif
 
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [0] = LAYOUT(KC_NUM, KC_1, KC_2, KC_3, KC_4, KC_5, KC_6, KC_7, KC_8, KC_9, KC_0, TG(4), KC_TAB, KC_Q, KC_W, KC_E, KC_R, KC_T, KC_Y, KC_U, KC_I, KC_O, KC_P, OS_LSFT, KC_LSFT, KC_A, KC_S, KC_D, KC_F, KC_G, KC_H, KC_J, KC_K, KC_L, KC_SCLN, KC_QUOT, KC_LCTL, KC_Z, KC_X, KC_C, KC_V, KC_B, KC_ESC, KC_RCTL, KC_N, KC_M, KC_COMM, KC_DOT, KC_SLSH, CW_TOGG, KC_LGUI, KC_LALT, MO(1), KC_SPC, KC_ENT, MO(2), KC_NO, KC_NO),
-    [1] = LAYOUT(KC_NO, KC_F13, KC_F14, KC_F15, KC_F16, KC_F17, LGUI(KC_SPC), KC_MPRV, KC_MPLY, KC_MNXT, KC_NO, KC_NO, LALT(KC_TAB), KC_GRV, LCTL(KC_W), LGUI(KC_E), LCTL(KC_R), LCTL(KC_T), KC_HOME, KC_PGUP, KC_UP, KC_PGDN, KC_INS, KC_NO, KC_TRNS, LCTL(KC_A), MS_BTN3, MS_BTN2, MS_BTN1, KC_F12, KC_END, KC_LEFT, KC_DOWN, KC_RGHT, KC_DEL, KC_NO, KC_LCTL, KC_LGUI, LCTL(KC_X), LCTL(KC_C), LCTL(KC_V), KC_PSCR, KC_F24, KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_CAPS, KC_TRNS, KC_TRNS, KC_TRNS, KC_NO, KC_BSPC, MO(3), KC_NO, KC_NO),
-    [2] = LAYOUT(KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, LALT(KC_TAB), KC_NO, KC_NO, RALT(KC_E), KC_NO, KC_NO, KC_NO, KC_LT, KC_GT, KC_NO, KC_NO, KC_NO, KC_TRNS, KC_NO, KC_GRV, KC_MINS, KC_EQL, KC_BSLS, KC_NO, KC_LPRN, KC_LCBR, KC_LBRC, KC_NO, KC_NO, KC_TRNS, KC_NO, KC_TILD, KC_UNDS, KC_PLUS, KC_PIPE, KC_NO, KC_TRNS, KC_NO, KC_RPRN, KC_RCBR, KC_RBRC, KC_NO, KC_NO, KC_TRNS, KC_TRNS, MO(3), KC_NO, KC_NO, KC_TRNS, KC_NO, KC_NO),
-    [3] = LAYOUT(KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, UG_TOGG, KC_NO, KC_F1, KC_F2, KC_F3, KC_F4, KC_NO, KC_NO, KC_P7, KC_P8, KC_P9, KC_NO, KC_NO, KC_TRNS, KC_F5, KC_F6, KC_F7, KC_F8, KC_LGUI, KC_NO, KC_P4, KC_P5, KC_P6, KC_LALT, KC_NO, KC_TRNS, KC_F9, KC_F10, KC_F11, KC_F12, KC_NO, KC_NO, KC_TRNS, KC_P0, KC_P1, KC_P2, KC_P3, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS, KC_NO, KC_NO, KC_TRNS, KC_NO, KC_NO),
-    [4] = LAYOUT(KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, TG(4), KC_TAB, KC_W, KC_L, KC_Y, KC_P, KC_B, KC_Z, KC_F, KC_O, KC_U, KC_QUOT, KC_NO, KC_NO, KC_C, KC_R, KC_S, KC_T, KC_G, KC_M, KC_N, KC_E, KC_I, KC_A, KC_NO, KC_NO, KC_Q, KC_J, KC_V, KC_D, KC_K, KC_NO, KC_NO, KC_X, KC_H, KC_SLSH, KC_COMM, KC_DOT, KC_NO, KC_NO, KC_NO, MO(5), KC_SPC, KC_ENT, KC_NO, KC_NO, KC_NO),
-    [5] = LAYOUT(KC_NO, KC_F13, KC_F14, KC_F15, KC_F16, KC_F17, LGUI(KC_SPC), KC_MPRV, KC_MPLY, KC_MNXT, KC_NO, KC_NO, LALT(KC_TAB), KC_GRV, LCTL(KC_W), LGUI(KC_E), LCTL(KC_R), LCTL(KC_T), KC_HOME, KC_PGUP, KC_UP, KC_PGDN, KC_INS, KC_NO, KC_TRNS, LCTL(KC_A), MS_BTN3, MS_BTN2, MS_BTN1, KC_F12, KC_END, KC_LEFT, KC_DOWN, KC_RGHT, KC_DEL, KC_NO, KC_LCTL, KC_LGUI, LCTL(KC_X), LCTL(KC_C), LCTL(KC_V), KC_PSCR, KC_NO, KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_CAPS, KC_TRNS, KC_TRNS, KC_TRNS, KC_NO, KC_BSPC, MO(3), KC_NO, KC_NO)
+enum custom_keycodes {
+    MY_GUI_L2 = SAFE_RANGE,
 };
+
+static bool     gui_l2_held        = false;
+static bool     gui_l2_interrupted = false;
+static uint16_t gui_l2_timer       = 0;
+
+bool oneshot_layer_2(keyrecord_t *record) {
+    if (record->event.pressed) {
+        gui_l2_held        = true;
+        gui_l2_interrupted = false;
+        gui_l2_timer       = timer_read();
+        layer_on(2);
+    } else {
+        gui_l2_held = false;
+        layer_off(2);
+        if (!gui_l2_interrupted && timer_elapsed(gui_l2_timer) < TAPPING_TERM) {
+            add_oneshot_mods(MOD_BIT(KC_LGUI));
+        }
+    }
+    return false;
+}
+static bool     lgui_shift_held = false;
+static bool     lgui_tapped     = false;
+static uint16_t lgui_timer      = 0;
+
+bool tap_dance_lgui(keyrecord_t *record) {
+    if (record->event.pressed) {
+        if (lgui_tapped && timer_elapsed(lgui_timer) < TAPPING_TERM) {
+            lgui_shift_held = true;
+            register_mods(MOD_BIT(KC_LSFT));
+        }
+        lgui_tapped = false;
+    } else {
+        if (lgui_shift_held) {
+            unregister_mods(MOD_BIT(KC_LSFT));
+            lgui_shift_held = false;
+        } else {
+            lgui_tapped = true;
+            lgui_timer  = timer_read();
+        }
+    }
+    return true;
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case MY_GUI_L2:
+            return oneshot_layer_2(record);
+        case KC_LGUI:
+            tap_dance_lgui(record);
+        default:
+            if (gui_l2_held && record->event.pressed) {
+                gui_l2_interrupted = true;
+            }
+            break;
+    }
+    return true;
+}
+
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {[0] = LAYOUT(KC_NUM, KC_1, KC_2, KC_3, KC_4, KC_5, KC_6, KC_7, KC_8, KC_9, KC_0, TG(4), KC_TAB, KC_Q, KC_W, KC_E, KC_R, KC_T, KC_Y, KC_U, KC_I, KC_O, KC_P, OS_LSFT, KC_LSFT, KC_A, KC_S, KC_D, KC_F, KC_G, KC_H, KC_J, KC_K, KC_L, KC_SCLN, KC_QUOT, KC_LCTL, KC_Z, KC_X, KC_C, KC_V, KC_B, KC_ESC, KC_RCTL, KC_N, KC_M, KC_COMM, KC_DOT, KC_SLSH, CW_TOGG, KC_LGUI, KC_LALT, MO(1), KC_SPC, KC_ENT, MY_GUI_L2, KC_NO, KC_NO),
+                                                              [1] = LAYOUT(KC_NO, KC_F13, KC_F14, KC_F15, KC_F16, KC_F17, LGUI(KC_SPC), KC_MPRV, KC_MPLY, KC_MNXT, KC_NO, KC_NO, LALT(KC_TAB), KC_GRV, LCTL(KC_W), LGUI(KC_E), LCTL(KC_R), LCTL(KC_T), KC_HOME, KC_PGUP, KC_UP, KC_PGDN, KC_INS, KC_NO, KC_TRNS, LCTL(KC_A), MS_BTN3, MS_BTN2, MS_BTN1, KC_F12, KC_END, KC_LEFT, KC_DOWN, KC_RGHT, KC_DEL, KC_NO, KC_LCTL, KC_LGUI, LCTL(KC_X), LCTL(KC_C), LCTL(KC_V), KC_PSCR, KC_F24, KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_CAPS, KC_TRNS, KC_TRNS, KC_TRNS, KC_NO, KC_BSPC, MO(3), KC_NO, KC_NO),
+                                                              [2] = LAYOUT(KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, LALT(KC_TAB), KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_LT, KC_GT, KC_NO, KC_NO, KC_NO, KC_TRNS, KC_NO, KC_GRV, KC_MINS, KC_EQL, KC_BSLS, KC_NO, KC_LPRN, KC_LCBR, KC_LBRC, KC_NO, KC_NO, KC_TRNS, KC_NO, KC_TILD, KC_UNDS, KC_PLUS, KC_PIPE, KC_NO, KC_TRNS, KC_NO, KC_RPRN, KC_RCBR, KC_RBRC, KC_NO, KC_NO, KC_TRNS, KC_TRNS, MO(3), KC_NO, KC_NO, KC_TRNS, KC_NO, KC_NO),
+                                                              [3] = LAYOUT(KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, UG_TOGG, KC_NO, KC_F1, KC_F2, KC_F3, KC_F4, KC_NO, KC_NO, KC_P7, KC_P8, KC_P9, KC_NO, KC_NO, KC_TRNS, KC_F5, KC_F6, KC_F7, KC_F8, KC_LGUI, KC_NO, KC_P4, KC_P5, KC_P6, KC_LALT, KC_NO, KC_TRNS, KC_F9, KC_F10, KC_F11, KC_F12, KC_NO, KC_NO, KC_TRNS, KC_P0, KC_P1, KC_P2, KC_P3, KC_NO, KC_NO, KC_NO, KC_NO, KC_TRNS, KC_NO, KC_NO, KC_TRNS, KC_NO, KC_NO),
+                                                              [4] = LAYOUT(KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, TG(4), KC_TAB, KC_W, KC_L, KC_Y, KC_P, KC_B, KC_Z, KC_F, KC_O, KC_U, KC_QUOT, KC_NO, KC_NO, KC_C, KC_R, KC_S, KC_T, KC_G, KC_M, KC_N, KC_E, KC_I, KC_A, KC_NO, KC_NO, KC_Q, KC_J, KC_V, KC_D, KC_K, KC_NO, KC_NO, KC_X, KC_H, KC_SLSH, KC_COMM, KC_DOT, KC_NO, KC_NO, KC_NO, MO(5), KC_SPC, KC_ENT, KC_NO, KC_NO, KC_NO),
+                                                              [5] = LAYOUT(KC_NO, KC_F13, KC_F14, KC_F15, KC_F16, KC_F17, LGUI(KC_SPC), KC_MPRV, KC_MPLY, KC_MNXT, KC_NO, KC_NO, LALT(KC_TAB), KC_GRV, LCTL(KC_W), LGUI(KC_E), LCTL(KC_R), LCTL(KC_T), KC_HOME, KC_PGUP, KC_UP, KC_PGDN, KC_INS, KC_NO, KC_TRNS, LCTL(KC_A), MS_BTN3, MS_BTN2, MS_BTN1, KC_F12, KC_END, KC_LEFT, KC_DOWN, KC_RGHT, KC_DEL, KC_NO, KC_LCTL, KC_LGUI, LCTL(KC_X), LCTL(KC_C), LCTL(KC_V), KC_PSCR, KC_NO, KC_TRNS, KC_NO, KC_NO, KC_NO, KC_NO, KC_NO, KC_CAPS, KC_TRNS, KC_TRNS, KC_TRNS, KC_NO, KC_BSPC, MO(3), KC_NO, KC_NO)};
 
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-    [0] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
-    [1] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
-    [2] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
-    [3] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
-    [4] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
-    [5] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [0] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU)}, [1] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU)}, [2] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU)}, [3] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU)}, [4] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU)}, [5] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(KC_VOLD, KC_VOLU)},
 };
 #endif
