@@ -1,6 +1,7 @@
 {
     "userspace_version": "1.1",
     "build_targets": [
-        ["splitkb/aurora/lily58/rev1", "nickpnevmati"]
+        ["splitkb/aurora/lily58/rev1", "nickpnevmati"],
+        ["framework/ansi", "nickpnevmati"]
     ]
 }
